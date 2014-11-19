@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map id="birds" xml:lang="en-US"> 
+ <title>Birds</title>
+ <topicref href="hummingbird.dita" type="concept"></topicref> 
+ <topicref href="ostrich.dita" type="concept"></topicref> 
+ <topicref href="swift.dita" type="concept"></topicref>
+</map>
