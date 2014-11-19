@@ -1,0 +1,9 @@
+# Format: <ending-crumbs> = <new-tag-name>
+# the ne tag name replaces the last tag in the crumbs
+
+# File must in UTF-8
+# Empty lines and lines starting with # are ignored
+# Casing is sensitive
+# Spaces and '=' are not allowed in the tag names (new or old)
+
+/figgroup/title = figtitle
