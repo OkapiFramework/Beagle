@@ -79,7 +79,7 @@ public class MainDialog extends JFrame implements ILog {
 
 	private void initComponents () {
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-		setTitle("Okapi Beagle - DITA Localization Utility");
+		setTitle("Okapi Beagle - DITA Localization Utilities");
 
 		WindowListener exitListener = new WindowAdapter() {
 			@Override
