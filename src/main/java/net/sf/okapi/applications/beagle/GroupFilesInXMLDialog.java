@@ -26,6 +26,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.io.File;
 
 import javax.swing.BorderFactory;
@@ -55,7 +56,7 @@ public class GroupFilesInXMLDialog extends JDialog {
 		boolean modal,
 		String ditaMapPath,
 		String tagRenPath,
-		String lbDefpPath)
+		String lbDefPath)
 	{
 		super(owner, modal);
 		
@@ -228,23 +229,22 @@ public class GroupFilesInXMLDialog extends JDialog {
 		// DITA Map file
 		String tmp = edDitaMap.getText().trim();
 		if ( tmp.isEmpty() ) {
-			
 			return;
 		}
 		ditaMapPath = tmp;
-
 		// Tag Renaming file
 		tagRenPath = edTagRen.getText().trim();
 		// Line-Breaks file
 		lbDefPath = edLbDef.getText().trim();
-		
 		cancelled = false;
+		dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)); 
 	}
 	
 	private void doCancel () {
-		
+		cancelled = true;
+		dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)); 
 	}
-	
+
 	public boolean isCancelled () {
 		return cancelled;
 	}

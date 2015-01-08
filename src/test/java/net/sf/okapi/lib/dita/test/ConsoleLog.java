@@ -20,36 +20,34 @@
 
 package net.sf.okapi.lib.dita.test;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-/**
- * Provides a set of utility functions for testing.
- */
-public class U {
+import net.sf.okapi.lib.dita.ILog;
 
-	/**
-	 * Gets the parent directory for a given path.
-	 * @param obj the object where to get the class.
-	 * @param filepath the path.
-	 * @return the parent directory of the path.
-	 */
-	public static String getParentDir (Object obj,
-		String filepath)
-	{
-        URL url = obj.getClass().getResource(filepath);
-        String parentDir = null;
-        if ( url != null ) {
-			try {
-				File file = new File(url.toURI());
-				parentDir = file.getParent();
-			}
-			catch (URISyntaxException e) {
-				return null;
-			}
-        }
-        return parentDir;
-    }
+public class ConsoleLog implements ILog {
+
+	@Override
+	public void log (String text) {
+		System.out.println(text);
+	}
+
+	@Override
+	public void showLog () {
+		// Do nothing
+	}
+
+	@Override
+	public void log (Throwable e) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw); 
+		e.printStackTrace(pw);
+		log(sw.toString());
+	}
+
+	@Override
+	public void clearLog () {
+		// Do nothing
+	}
 
 }

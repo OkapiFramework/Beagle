@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <title>Okapi Beagle</title>
+  </head>
+  <body>
+    <h1>Okapi Beagle — Help</h1>
+    <p>Okapi Beagle is a set of utilities for DITA documents.<br>
+      The tool is open-source and its source code is available at <a href="https://github.com/OkapiFramework/Beagle">https://github.com/OkapiFramework/Beagle</a>.</p>
+    <h2>Commands</h2>
+    <ul>
+      <li><a href="#AnalyzeRefsInDir">Analyze References in a Directory</a></li>
+      <li><a href="#GroupFilesIntoSingleFile">Group DITA Files Into a Single XML</a></li>
+      <li><a href="#ScanDir">Scan Directory</a></li>
+    </ul>
+    <br>
+    <hr style="color: black; border-style: solid;">
+    <h3><a id="AnalyzeRefsInDir" name="AnalyzeRefsInDir"></a>Analyze References
+      in a Directory</h3>
+    <p>This command looks at all .ditamap files in a given directory (not
+      recursively) and gather all <code>href</code> and <code>conref</code>
+      references they have (<code>&lt;xref&gt;</code> elements excluded).</p>
+    <p>Then it gathers all .dita and .ditamap files in the same given directory
+      (recursively) and compare the two lists.</p>
+    <p>The output shows:</p>
+    <ul>
+      <li>The list of the files used.</li>
+      <li>The list of the .dita files not referenced from any processed file.</li>
+      <li>The list of the .ditamap files not referenced (These last files can be
+        either top-level map files, or unused map files).</li>
+    </ul>
+    <br>
+    <hr style="color: black; border-style: solid;">
+    <h3><a id="GroupFilesIntoSingleFile" name="GroupFilesIntoSingleFile"></a>Group
+      DITA Files Into a Single XML</h3>
+    <p>This command takes a .ditamap file and creates a single XML output
+      generated from the content of the .ditamap file, with all occurrences of <code>&lt;topicref&gt;</code>
+      and <code>&lt;mapref&gt;</code> elements replaced by their content
+      (recursively).</p>
+    <p>The output file has the same name as the input .ditamap file, with the
+      suffix ".single-out.xml".</p>
+    <ul>
+      <li>The DTDs are not processed.</li>
+      <li>The <code>&amp;nbsp;</code> character entity references are replaced
+        by literal non-breaking spaces (U+00A0).</li>
+      <li>Each line-break is replaced by a space (U+0020), except within
+        elements that are listed in the Line-Break Definition file.</li>
+      <li>Files inserted into the input map file are bracketed with a START and
+        an END comment.</li>
+      <li>If a reference cannot be found, a warning is generated in the log and
+        a comment inserted in the output file.</li>
+      <li>You can rename tags as needed, using the Tag Renaming Definition file.</li>
+    </ul>
+    <h4>Tag Renaming Definition File</h4>
+    <p>You may specify a file that defines how to rename specific tags. In that
+      file you must list all the cases of elements that should be renamed.</p>
+    <p>The format of each line in the file is as follows:</p>
+    <pre>&lt;ending-crumbs&gt; = &lt;new-tag-name&gt;</pre>
+    <p>Where <code>&lt;new-tag-name&gt;</code> is the new name for the element
+      that ends with <code>&lt;ending-crumbs&gt;</code>.</p>
+    <p>For example, if you have the line:</p>
+    <pre>/figgroup/title = figtitle</pre>
+    <p>Any element <code>&lt;title&gt;</code> coming just after an element <code>&lt;figgroup&gt;</code>
+      will be renamed <code>&lt;figtitle&gt;</code>. The match is done on the
+      ending part of the crumbs. So the rule above will work when the crumbs are
+      for example: <code>/concept/conbody/p/fig<span style="text-decoration: underline;">/figgroup/title</span></code>
+      or <code>/task/taskbody/steps/step/info/fig<span style="text-decoration: underline;">/figgroup/title</span></code>.
+      If you need different names for different context, just add the context
+      needed on the left side of the crumbs in the expression, for example:</p>
+    <pre>/info/fig/figgroup/title = infoFigTitle<br>/figgroup/title = figtitle</pre>
+    <ul>
+    </ul>
+    Important requirements for the file:
+    <ul>
+      <li>You must have the longest entries (<code>&lt;ending-crumbs&gt;</code>)
+        listed first because the tool uses the first entry it finds.</li>
+      <li>The file must be in UTF-8</li>
+      <li>Empty lines and lines starting with # are ignored.</li>
+      <li>Casing is sensitive.</li>
+      <li>Spaces and '=' are not allowed in the tag names (new or old).</li>
+    </ul>
+    <h4>Line-Break Definition File</h4>
+    <p>You may specify a file that lists all the elements within which the
+      line-breaks must be preserved and/or a line-break must be added just after
+      the end of the element. The contents of the elements not listed has <code>p</code>
+      or <code>pa</code> have their line-breaks replaced by an ASCII space.</p>
+    <p>The format of each line in the file is as follows:</p>
+    <pre>&lt;ending-crumbs&gt; = p|pa|d|da</pre>
+    <p>Where:</p>
+    <ul>
+      <li> <code>p</code> indicates to preserve the line-breaks in the element,</li>
+      <li><code>pa</code> indicates to preserve the line breaks in the element
+        and add one just after its end,</li>
+      <li><code>d</code> indicates to normalize the line-breaks in the element,</li>
+      <li><code>da</code> indicates to normalize the line-breaks in the element
+        and add one just after its end.</li>
+    </ul>
+    <p>For example, if you have the line:</p>
+    <pre>/figgroup/title = p</pre>
+    <p>The line-breaks within all <code>&lt;p&gt;</code> element inside <code>&lt;figgroup&gt;</code>
+      will be preserved, and no line-break will be added after the closing of
+      that element.</p>
+    <p>Important requirements for the file:</p>
+    <ul>
+      <li>You must have the longest entries (<code>&lt;ending-crumbs&gt;</code>)
+        listed first because the tool uses the first entry it finds.</li>
+      <li>The file must be in UTF-8</li>
+      <li>Empty lines and lines starting with # are ignored.</li>
+      <li>Casing is sensitive.</li>
+    </ul>
+    <br>
+    <hr style="color: black; border-style: solid;">
+    <h3><a id="ScanDir" name="ScanDir"></a>Scan Directory</h3>
+    <p>Documentation to be done.</p>
+    <br>
+  </body>
+</html>

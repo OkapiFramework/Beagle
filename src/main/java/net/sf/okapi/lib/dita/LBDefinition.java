@@ -1,5 +1,5 @@
 /*===========================================================================
-  Copyright (C) 2014-2015 by the Okapi Framework contributors
+  Copyright (C) 2015 by the Okapi Framework contributors
 -----------------------------------------------------------------------------
   This library is free software; you can redistribute it and/or modify it 
   under the terms of the GNU Lesser General Public License as published by 
@@ -25,32 +25,56 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
-public class TagRenamer {
+/**
+ * Maintains a list of the context in which line-breaks are allowed,
+ * and / or where a line-break need to be added at the end of the element.
+ */
+public class LBDefinition {
 
-	private Map<String, String> map = new LinkedHashMap<>();
+	private Map<String, String> map = new HashMap<>();
 	
 	/**
-	 * Indicates if a given crumbs should trigger a renaming.
+	 * Gets the information about preserving line-breaks for a given element.
 	 * @param crumbs the crumbs to look at.
-	 * @return true if a renaming is needed, false otherwise.
+	 * @return true if line-break in the given element are to be preserved,
+	 * false if they can be normalized, null if the element name is not specified.
 	 */
-	public boolean needsRenaming (String crumbs) {
-		return (getNewName(crumbs) != null);
-	}
-	
-	/**
-	 * Gets the new name for the given last name of the crumbs.
-	 * @param crumbs the crumbs.
-	 * @return the new name, or null if no new name was found.
-	 */
-	public String getNewName (String crumbs) {
+	public Boolean preserveLb (String crumbs) {
 		for ( String key : map.keySet() ) {
-			if ( crumbs.endsWith(key) ) return map.get(key);
+			if ( crumbs.endsWith(key) ) {
+				switch ( map.get(key) ) {
+				case "p":
+				case "pa":
+					return true;
+				default:
+					return false;
+				}
+			}
 		}
 		return null;
+	}
+
+	/**
+	 * Indicates if a line-break must be added at the end of a given element.
+	 * @param crumbs the crumbs to look at.
+	 * @return true to add a line-break, false otherwise.
+	 */
+	public boolean addLb (String crumbs) {
+		for ( String key : map.keySet() ) {
+			if ( crumbs.endsWith(key) ) {
+				switch ( map.get(key) ) {
+				case "da":
+				case "pa":
+					return true;
+				default:
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 
 	public boolean loadFile (File input) {
@@ -63,6 +87,7 @@ public class TagRenamer {
 		) {
 			map.clear();
 			String tmp;
+			// elem1/elem2 = pa, da, p, d
 			while ((tmp = in.readLine()) != null) {
 				tmp = tmp.trim();
 				if ( tmp.isEmpty() || tmp.startsWith("#") ) continue;
@@ -76,12 +101,21 @@ public class TagRenamer {
 				if ( key.isEmpty() || value.isEmpty() ) {
 					throw new RuntimeException("Syntax error in line: "+tmp);
 				}
+				switch ( value ) {
+				case "p":
+				case "pa":
+				case "d":
+				case "da":
+					break;
+				default:
+					throw new RuntimeException("Invalid value (must be p, pa, d or da) in line: "+tmp);
+				}
 				map.put(key, value);
 			}
 			return true;
 		}
 		catch (Throwable e) {
-			throw new RuntimeException("Error loading the tag-renaming file.", e);
+			throw new RuntimeException("Error loading the line-break definition file.", e);
 		}
 	}
 	

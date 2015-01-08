@@ -39,6 +39,7 @@ public class SingleFileMaker implements Closeable {
 	final private XMLEventFactory evfact;
 	final private ILog log;
 	final private TagRenamer tagRen;
+	final private LBDefinition lbDef;
 	
 	private XMLEventWriter writer = null;
 	private File inputFile;
@@ -50,6 +51,7 @@ public class SingleFileMaker implements Closeable {
 		this.log = log;
 		this.evfact = XMLEventFactory.newInstance();
 		this.tagRen = new TagRenamer();
+		this.lbDef = new LBDefinition();
 	}
 
 	public void setParameters (File inputFile,
@@ -75,6 +77,12 @@ public class SingleFileMaker implements Closeable {
 		}
 		// Line-breaks file
 		log.log("Line-breaks definition file: "+(lbDefFile==null ? "None" : lbDefFile.getAbsolutePath()));
+		if ( lbDefFile != null ) {
+			if ( !lbDef.loadFile(lbDefFile) ) {
+				log.log("WARNING: line-breaks definition file not found.");
+			}
+		}
+		
 		// Output file
 		log.log("Output: "+outputFile.getAbsolutePath());
 		
@@ -85,7 +93,7 @@ public class SingleFileMaker implements Closeable {
 		writer.add(evfact.createCharacters("\n"));
 		writer.add(evfact.createStartElement("", null, "ROOT"));
 		
-		HarvesterRewriter hw = new HarvesterRewriter(log, writer, evfact, tagRen);
+		HarvesterRewriter hw = new HarvesterRewriter(log, writer, evfact, tagRen, lbDef);
 		hw.process(inputFile);
 		
 		writer.add(evfact.createEndElement("", null, "ROOT"));

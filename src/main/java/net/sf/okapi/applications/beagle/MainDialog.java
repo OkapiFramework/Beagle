@@ -64,7 +64,11 @@ public class MainDialog extends JFrame implements ILog {
 	private static final String SETTING_PATH = ".beagle";
 	private static final String TAB_START = "<html><body><table width='160'>";
 	private static final String TAB_END = "</table></body></html>";
-
+	
+	static final String DITAMAPPATH = "ditaMapPath";
+	static final String LBDEFPATH = "lbDefPath";
+	static final String TAGRENPATH = "tagRenPath";
+	
 	private JTabbedPane tabPane;
 	private DocumentsPanel docPane;
 	private JTextArea edLog;
@@ -286,27 +290,33 @@ public class MainDialog extends JFrame implements ILog {
 		
     	try {
     		GroupFilesInXMLDialog dlg = new GroupFilesInXMLDialog(this, true,
-    			config.getProperty("ditaMapPath", ""),
-    			config.getProperty("tagRenPath", ""),
-    			config.getProperty("lbDefPath", ""));
+    			config.getProperty(DITAMAPPATH, ""),
+    			config.getProperty(TAGRENPATH, ""),
+    			config.getProperty(LBDEFPATH, ""));
     		dlg.setVisible(true);
     		if ( dlg.isCancelled() ) {
     			log("Cancelled by user.");
     			return;
     		}
 
-    		File ditaMapFile = new File(dlg.getDitaMapPath());
-    		config.setProperty("ditaMapPath", ditaMapFile.getAbsolutePath());
-    		File tagRenFile = (dlg.getTagRenPath() == null ? null : new File(dlg.getTagRenPath()));
-    		config.setProperty("tagRenPath", tagRenFile.getAbsolutePath());
-    		File lbDefFile = (dlg.getLbDefPath() == null ? null : new File(dlg.getLbDefPath()));
-    		config.setProperty("lbDefPath", lbDefFile.getAbsolutePath());
-    		File outFile = new File(ditaMapFile.getAbsolutePath()+".single-out.xml");
+			File ditaMapFile = new File(dlg.getDitaMapPath());
+			config.setProperty(DITAMAPPATH, ditaMapFile.getAbsolutePath());
 
-    		try ( SingleFileMaker sfm = new SingleFileMaker(this) ) {
-    			sfm.setParameters(ditaMapFile, tagRenFile, lbDefFile, outFile);
-        		sfm.process();
-    		}
+			File tagRenFile = (dlg.getTagRenPath() == null ? null : new File(dlg.getTagRenPath()));
+			if ( tagRenFile != null ) {
+				config.setProperty(TAGRENPATH, tagRenFile.getAbsolutePath());
+			}
+
+			File lbDefFile = (dlg.getLbDefPath() == null ? null : new File(dlg.getLbDefPath()));
+			if ( lbDefFile != null ) {
+				config.setProperty(LBDEFPATH, lbDefFile.getAbsolutePath());
+			}
+
+			File outFile = new File(ditaMapFile.getAbsolutePath() + ".single-out.xml");
+			try (SingleFileMaker sfm = new SingleFileMaker(this)) {
+				sfm.setParameters(ditaMapFile, tagRenFile, lbDefFile, outFile);
+				sfm.process();
+			}
 			log("Done.");
     	}
     	catch ( Throwable e ) {
@@ -422,8 +432,8 @@ public class MainDialog extends JFrame implements ILog {
 		InputStream input = null;
 		try {
 			File file = new File(SETTING_PATH);
-			if ( !file.exists() ) return;
 			config = new Properties();
+			if ( !file.exists() ) return;
 			config.load(new FileInputStream(file));
 		}
 		catch ( Throwable e) {

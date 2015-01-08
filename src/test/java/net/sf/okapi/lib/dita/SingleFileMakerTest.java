@@ -1,5 +1,5 @@
 /*===========================================================================
-  Copyright (C) 2014-2015 by the Okapi Framework contributors
+  Copyright (C) 2015 by the Okapi Framework contributors
 -----------------------------------------------------------------------------
   This library is free software; you can redistribute it and/or modify it 
   under the terms of the GNU Lesser General Public License as published by 
@@ -18,38 +18,40 @@
   See also the full LGPL text here: http://www.gnu.org/copyleft/lesser.html
 ===========================================================================*/
 
-package net.sf.okapi.lib.dita.test;
+package net.sf.okapi.lib.dita;
+
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.IOException;
 
-/**
- * Provides a set of utility functions for testing.
- */
-public class U {
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLStreamException;
 
-	/**
-	 * Gets the parent directory for a given path.
-	 * @param obj the object where to get the class.
-	 * @param filepath the path.
-	 * @return the parent directory of the path.
-	 */
-	public static String getParentDir (Object obj,
-		String filepath)
+import net.sf.okapi.lib.dita.test.ConsoleLog;
+import net.sf.okapi.lib.dita.test.U;
+
+import org.junit.Test;
+
+public class SingleFileMakerTest {
+
+	private final String root = U.getParentDir(this, "/birds.ditamap");
+
+	@Test
+	public void testSimple ()
+		throws IOException, XMLStreamException, FactoryConfigurationError
 	{
-        URL url = obj.getClass().getResource(filepath);
-        String parentDir = null;
-        if ( url != null ) {
-			try {
-				File file = new File(url.toURI());
-				parentDir = file.getParent();
-			}
-			catch (URISyntaxException e) {
-				return null;
-			}
-        }
-        return parentDir;
-    }
+		try (SingleFileMaker sfm = new SingleFileMaker(new ConsoleLog())) {
+			File inputFile = new File(root + "/birds.ditamap");
+			File tagRenFile = new File(root + "/tag-renaming.txt");
+			File lbDefFile = new File(root + "/lb-definition.txt");
+			File outputFile = new File(inputFile.getAbsolutePath()
+					+ ".single.xml");
+			outputFile.delete();
+			sfm.setParameters(inputFile, tagRenFile, lbDefFile, outputFile);
+			sfm.process();
+			assertTrue(outputFile.exists());
+		}
+	}
 
 }

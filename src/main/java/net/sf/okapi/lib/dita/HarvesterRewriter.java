@@ -1,5 +1,5 @@
 /*===========================================================================
-  Copyright (C) 2014 by the Okapi Framework contributors
+  Copyright (C) 2014-2015 by the Okapi Framework contributors
 -----------------------------------------------------------------------------
   This library is free software; you can redistribute it and/or modify it 
   under the terms of the GNU Lesser General Public License as published by 
@@ -21,6 +21,7 @@
 package net.sf.okapi.lib.dita;
 
 import java.io.File;
+import java.util.Stack;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventFactory;
@@ -42,6 +43,7 @@ public class HarvesterRewriter {
 	final private ILog log;
 	final private XMLEventFactory evFact;
 	final TagRenamer tagRen;
+	final LBDefinition lbDef;
 	
 	private StringBuilder crumbs;
 	private String basePath = null;
@@ -49,12 +51,14 @@ public class HarvesterRewriter {
 	public HarvesterRewriter (ILog log,
 		XMLEventWriter writer,
 		XMLEventFactory evFact,
-		TagRenamer tagRen)
+		TagRenamer tagRen,
+		LBDefinition lbDef)
 	{
 		this.log = log;
 		this.writer = writer;
 		this.evFact = evFact;
 		this.tagRen = tagRen;
+		this.lbDef = lbDef;
 	}
 	
 	public void process (File inputFile)
@@ -81,13 +85,20 @@ public class HarvesterRewriter {
 			boolean wasChars = false;
 			crumbs = new StringBuilder();
 			String newName;
-//System.out.println("------: "+path);
+			Stack<Boolean> preserveLB = new Stack<>();
+			preserveLB.push(false);
 			
+//System.out.println("------: "+path);
+			final String refElements = ";topicref;mapref;";
+			String name;
 			while ( reader.hasNext() ) {
 				XMLEvent event = reader.nextEvent();
 				
 				if (( tmp.length() > 0 ) && !event.isCharacters() ) {
-					String text = tmp.toString().replaceAll("\\n", " ");
+					String text = tmp.toString();
+					if ( !preserveLB.peek() ) {
+						text = text.replaceAll("\\n", " ");
+					}
 					writer.add(evFact.createCharacters(text));
 					wasChars = false;
 				}
@@ -95,10 +106,14 @@ public class HarvesterRewriter {
 				switch ( event.getEventType() ) {
 				case XMLEvent.START_ELEMENT:
 					StartElement se = event.asStartElement();
-					String name = se.getName().toString();
+					name = se.getName().toString();
 					crumbs.append("/"+name);
-//System.out.println(crumbs.toString());
-					if ( se.getName().toString().equals("topicref") ) {
+					
+					Boolean res = lbDef.preserveLb(crumbs.toString());
+					if ( res == null ) preserveLB.push(preserveLB.peek());
+					else preserveLB.push(res);
+
+					if ( refElements.indexOf(";"+name+";") > -1 ) {
 						String href = getAttrValue(se, "href");
 						if ( href != null ) {
 							p = href.lastIndexOf('#');
@@ -130,7 +145,8 @@ public class HarvesterRewriter {
 					
 				case XMLEvent.END_ELEMENT:
 					EndElement ee = event.asEndElement();
-					if ( ee.getName().toString().equals("topicref") ) {
+					name = ee.getName().toString();
+					if ( refElements.indexOf(";"+name+";") > -1 ) {
 						// Skip the output, but still need to pop the crumbs
 					}
 					else {
@@ -145,6 +161,10 @@ public class HarvesterRewriter {
 							writer.add(event);
 						}
 						writer.flush();
+					}
+					preserveLB.pop();
+					if ( lbDef.addLb(crumbs.toString()) ) {
+						writer.add(evFact.createCharacters("\n"));
 					}
 					popCrumbs(); // Pop the crumbs
 					break;
@@ -208,7 +228,8 @@ public class HarvesterRewriter {
 			writer.add(evFact.createComment("FILE NOT FOUND: "+file.getAbsolutePath()));
 			return;
 		}
-		HarvesterRewriter hw = new HarvesterRewriter(log, writer, evFact, tagRen);
+		log.log("Following: "+ref);
+		HarvesterRewriter hw = new HarvesterRewriter(log, writer, evFact, tagRen, lbDef);
 		writer.add(evFact.createComment("START "+file.getAbsolutePath()));
 		hw.process(file);
 		writer.add(evFact.createComment("END "+file.getAbsolutePath()));

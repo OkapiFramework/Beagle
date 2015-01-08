@@ -1,0 +1,10 @@
+# Format: <ending-crumbs> = p|d|pa|da
+# p=preserveLB, d=default for LB,
+# pa=preserveLB and add LB, da=default for LB, add LB.
+
+# File must in UTF-8
+# Empty lines and lines starting with # are ignored
+# Casing is sensitive
+# List longest crumbs first
+
+/p = da
