@@ -101,6 +101,7 @@ public class HarvesterRewriter {
 					}
 					writer.add(evFact.createCharacters(text));
 					wasChars = false;
+					tmp.setLength(0);
 				}
 				
 				switch ( event.getEventType() ) {

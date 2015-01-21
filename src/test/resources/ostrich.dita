@@ -2,7 +2,20 @@
 <!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
 <concept id="ostrich" xml:lang="en-US"> 
  <title>Ostrich</title> 
- <conbody> 
- <p>Heaviest bird: Ostrich (330 lb)</p> 
+ <conbody>
+  <section>
+   <title>Radio and Television Interference</title>
+   <p>This equipment has been tested and found to comply with the limits of
+a Class A digital device, pursuant to Part 15 of the FCC rules.
+These limits are designed to provide reasonable protection against
+harmful interference when the equipment is operated in a commercial
+environment. This equipment generates, uses, and can radiate radio
+frequency energy and, if not installed and used in accordance with
+the instruction manual, may cause harmful interference to radio
+communications. Operation of this equipment in a residential area
+is likely to cause harmful interference in which case the user will
+be required to correct the interference at his own expense.</p>
+   <p>Heaviest bird: Ostrich (330 lb)</p>
+  </section>
  </conbody>
 </concept> 
